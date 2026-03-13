@@ -6,6 +6,7 @@ function App() {
   const [contacts, setContacts] = useState([])
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
+  const [hoverIndex, setHoverIndex] = useState(null)
 
   function selectContact(contact) {
 
@@ -110,10 +111,13 @@ function App() {
               <div
                 key={i}
                 onClick={() => selectContact(c)}
+                onMouseEnter={() => setHoverIndex(i)}
+                onMouseLeave={() => setHoverIndex(null)}
                 style={{
                   padding: "10px",
                   borderBottom: "1px solid #eee",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  backgroundColor: hoverIndex === i ? "#f5f7fa" : "white"
                 }}
               >
 
