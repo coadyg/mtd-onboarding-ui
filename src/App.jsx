@@ -2,23 +2,35 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
+
   const [contacts, setContacts] = useState([])
 
-  function loadContacts() {
-    console.log("This will later call Zoho CRM")
-    alert("Next step will load contacts from Zoho CRM")
+  async function loadContacts() {
+
+    const response = await fetch(
+      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContacts/execute"
+    )
+
+    const data = await response.json()
+
+    setContacts(data)
+
   }
 
   return (
-    <div style={{padding: "40px", fontFamily: "Arial"}}>
+    <div style={{ padding: "40px", fontFamily: "Arial" }}>
       <h1>MTD Onboarding Tool</h1>
 
       <button onClick={loadContacts}>
         Load Contacts
       </button>
 
-      <div style={{marginTop: "30px"}}>
-        {contacts.length === 0 && <p>No contacts loaded yet</p>}
+      <div style={{ marginTop: "30px" }}>
+        {contacts.map((c, i) => (
+          <div key={i}>
+            {c.name} — {c.email}
+          </div>
+        ))}
       </div>
     </div>
   )
