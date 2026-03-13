@@ -1,34 +1,26 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [contacts, setContacts] = useState([])
+
+  function loadContacts() {
+    console.log("This will later call Zoho CRM")
+    alert("Next step will load contacts from Zoho CRM")
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div style={{padding: "40px", fontFamily: "Arial"}}>
+      <h1>MTD Onboarding Tool</h1>
+
+      <button onClick={loadContacts}>
+        Load Contacts
+      </button>
+
+      <div style={{marginTop: "30px"}}>
+        {contacts.length === 0 && <p>No contacts loaded yet</p>}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
