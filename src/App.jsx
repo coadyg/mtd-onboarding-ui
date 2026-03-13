@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./App.css"
 
 function App() {
@@ -6,17 +6,29 @@ function App() {
   const [contacts, setContacts] = useState([])
   const [query, setQuery] = useState("")
 
-  async function searchContacts() {
+  useEffect(() => {
 
-    const response = await fetch(
-      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContacts_2/execute?q=" + query
-    )
+    if (!query) {
+      setContacts([])
+      return
+    }
 
-    const data = await response.json()
+    const timeout = setTimeout(async () => {
 
-    setContacts(data)
+      const response = await fetch(
+        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContacts_2/execute?q=" +
+        encodeURIComponent(query)
+      )
 
-  }
+      const data = await response.json()
+
+      setContacts(data)
+
+    }, 300)
+
+    return () => clearTimeout(timeout)
+
+  }, [query])
 
   return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
@@ -28,12 +40,8 @@ function App() {
         placeholder="Search client..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        style={{ marginRight: "10px" }}
+        style={{ marginRight: "10px", padding: "6px", width: "240px" }}
       />
-
-      <button onClick={searchContacts}>
-        Search
-      </button>
 
       <div style={{ marginTop: "30px" }}>
         {contacts.map((c, i) => (
