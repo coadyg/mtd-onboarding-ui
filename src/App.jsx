@@ -7,13 +7,9 @@ function App() {
 
   async function loadContacts() {
 
-    const response = await fetch(
-      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContacts/execute"
-    )
-
-    const data = await response.json()
-
-    setContacts(data)
+const response = await fetch("/server/getContacts_2/execute");
+const data = await response.json();
+setContacts(data);
 
   }
 
