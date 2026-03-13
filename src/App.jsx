@@ -47,42 +47,83 @@ function App() {
   }, [query])
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial", textAlign: "center" }}>
+    <div style={{
+      paddingTop: "120px",
+      fontFamily: "Arial",
+      textAlign: "center"
+    }}>
 
       <h1>MTD Onboarding Tool</h1>
 
-      <input
-        type="text"
-        placeholder="Search client..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{
-          marginTop: "10px",
-          padding: "8px",
-          width: "250px",
-          fontSize: "14px"
-        }}
-      />
+      <div style={{
+        width: "320px",
+        margin: "0 auto",
+        position: "relative"
+      }}>
 
-      <div style={{ marginTop: "30px" }}>
+        <input
+          type="text"
+          placeholder="Search client..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            fontSize: "14px",
+            borderRadius: "6px",
+            border: "1px solid #ccc"
+          }}
+        />
 
-        {loading && (
-          <div style={{ color: "#777" }}>
-            Searching...
+        {(contacts.length > 0 || loading) && (
+
+          <div style={{
+            position: "absolute",
+            top: "42px",
+            left: 0,
+            right: 0,
+            background: "white",
+            border: "1px solid #ddd",
+            borderRadius: "6px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            textAlign: "left",
+            zIndex: 10
+          }}>
+
+            {loading && (
+              <div style={{ padding: "10px", color: "#777" }}>
+                Searching...
+              </div>
+            )}
+
+            {!loading && contacts.map((c, i) => (
+
+              <div
+                key={i}
+                style={{
+                  padding: "10px",
+                  borderBottom: "1px solid #eee",
+                  cursor: "pointer"
+                }}
+              >
+                <div style={{ fontWeight: "500" }}>
+                  {c.name}
+                </div>
+
+                <div style={{
+                  fontSize: "12px",
+                  color: "#666"
+                }}>
+                  {c.email}
+                </div>
+
+              </div>
+
+            ))}
+
           </div>
+
         )}
-
-        {!loading && contacts.length === 0 && query && (
-          <div style={{ color: "#777" }}>
-            No results
-          </div>
-        )}
-
-        {contacts.map((c, i) => (
-          <div key={i} style={{ marginTop: "6px" }}>
-            {c.name} — {c.email}
-          </div>
-        ))}
 
       </div>
 
