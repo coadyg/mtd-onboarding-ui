@@ -14,6 +14,39 @@ function App() {
 
     setQuery(contact.name)
     setContacts([])
+    setHoverIndex(null)
+
+  }
+
+  function handleKeyDown(e) {
+
+    if (contacts.length === 0) return
+
+    if (e.key === "ArrowDown") {
+
+      e.preventDefault()
+
+      setHoverIndex((prev) =>
+        prev === null || prev === contacts.length - 1 ? 0 : prev + 1
+      )
+
+    }
+
+    if (e.key === "ArrowUp") {
+
+      e.preventDefault()
+
+      setHoverIndex((prev) =>
+        prev === null || prev === 0 ? contacts.length - 1 : prev - 1
+      )
+
+    }
+
+    if (e.key === "Enter" && hoverIndex !== null) {
+
+      selectContact(contacts[hoverIndex])
+
+    }
 
   }
 
@@ -76,6 +109,7 @@ function App() {
           placeholder="Search client..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           style={{
             width: "100%",
             padding: "10px",
