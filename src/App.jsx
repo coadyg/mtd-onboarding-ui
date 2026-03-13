@@ -7,6 +7,15 @@ function App() {
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
 
+  function selectContact(contact) {
+
+    console.log("Selected contact:", contact)
+
+    setQuery(contact.name)
+    setContacts([])
+
+  }
+
   useEffect(() => {
 
     if (!query) {
@@ -100,12 +109,14 @@ function App() {
 
               <div
                 key={i}
+                onClick={() => selectContact(c)}
                 style={{
                   padding: "10px",
                   borderBottom: "1px solid #eee",
                   cursor: "pointer"
                 }}
               >
+
                 <div style={{ fontWeight: "500" }}>
                   {c.name}
                 </div>
