@@ -150,6 +150,29 @@ useEffect(() => {
 
 }, [query, contactIndex, selectedContact])
 
+  async function startOnboarding() {
+
+  try {
+
+    const response = await fetch(
+      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSession/execute?contactId=" +
+      selectedContact.id
+    )
+
+    const data = await response.json()
+
+    console.log("Onboarding session created:", data)
+
+    alert("Onboarding session created: " + data.sessionId)
+
+  } catch (err) {
+
+    console.error("Failed to start onboarding:", err)
+
+  }
+
+}
+
   return (
     <div style={{
       paddingTop: "120px",
@@ -278,7 +301,7 @@ useEffect(() => {
                   marginRight: "10px",
                   cursor: "pointer"
                 }}
-                onClick={() => console.log("Start onboarding for:", selectedContact.id)}
+                onClick={startOnboarding}
               >
                 Start MTD onboarding
               </button>
