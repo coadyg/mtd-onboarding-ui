@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import "./App.css"
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   const [hoverIndex, setHoverIndex] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedContact, setSelectedContact] = useState(null)
+  const searchRef = useRef(null)
 
   function selectContact(contact) {
 
@@ -104,6 +106,28 @@ const normalised = data.map(c => ({
 
   // local search
 
+  useEffect(() => {
+
+  function handleClickOutside(event) {
+
+    if (
+      searchRef.current &&
+      !searchRef.current.contains(event.target)
+    ) {
+      setResults([])
+      setHoverIndex(null)
+    }
+
+  }
+
+  document.addEventListener("mousedown", handleClickOutside)
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside)
+  }
+
+}, [])
+
 useEffect(() => {
 
   // stop search if a contact has already been chosen
@@ -142,11 +166,14 @@ useEffect(() => {
 
       {!loading && (
 
-        <div style={{
-          width: "320px",
-          margin: "0 auto",
-          position: "relative"
-        }}>
+<div
+  ref={searchRef}
+  style={{
+    width: "320px",
+    margin: "0 auto",
+    position: "relative"
+  }}
+>
 
           <input
             type="text"
