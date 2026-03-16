@@ -104,22 +104,28 @@ const normalised = data.map(c => ({
 
   // local search
 
-  useEffect(() => {
+useEffect(() => {
 
-    if (!query) {
-      setResults([])
-      return
-    }
+  // stop search if a contact has already been chosen
+  if (selectedContact) {
+    setResults([])
+    return
+  }
 
-    const q = query.toLowerCase()
+  if (!query) {
+    setResults([])
+    return
+  }
 
-    const filtered = contactIndex
-      .filter(c => c.search.includes(q))
-      .slice(0, 10)
+  const q = query.toLowerCase()
 
-    setResults(filtered)
+  const filtered = contactIndex
+    .filter(c => c.search.includes(q))
+    .slice(0, 10)
 
-  }, [query, contactIndex])
+  setResults(filtered)
+
+}, [query, contactIndex, selectedContact])
 
   return (
     <div style={{
