@@ -3,31 +3,34 @@ import "./App.css"
 
 function App() {
 
-  const [contacts, setContacts] = useState([])
+  const [contactIndex, setContactIndex] = useState([])
+  const [results, setResults] = useState([])
   const [query, setQuery] = useState("")
-  const [loading, setLoading] = useState(false)
   const [hoverIndex, setHoverIndex] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   function selectContact(contact) {
 
     console.log("Selected contact:", contact)
 
-    setQuery(contact.name)
-    setContacts([])
+    const name = contact.search.split("|")[0].trim()
+
+    setQuery(name)
+    setResults([])
     setHoverIndex(null)
 
   }
 
   function handleKeyDown(e) {
 
-    if (contacts.length === 0) return
+    if (results.length === 0) return
 
     if (e.key === "ArrowDown") {
 
       e.preventDefault()
 
-      setHoverIndex((prev) =>
-        prev === null || prev === contacts.length - 1 ? 0 : prev + 1
+      setHoverIndex(prev =>
+        prev === null || prev === results.length - 1 ? 0 : prev + 1
       )
 
     }
@@ -36,46 +39,44 @@ function App() {
 
       e.preventDefault()
 
-      setHoverIndex((prev) =>
-        prev === null || prev === 0 ? contacts.length - 1 : prev - 1
+      setHoverIndex(prev =>
+        prev === null || prev === 0 ? results.length - 1 : prev - 1
       )
 
     }
 
     if (e.key === "Enter" && hoverIndex !== null) {
 
-      selectContact(contacts[hoverIndex])
+      selectContact(results[hoverIndex])
 
     }
 
   }
 
+  // load contact index once
+
   useEffect(() => {
 
-    if (!query) {
-      setContacts([])
-      return
-    }
-
-    const timeout = setTimeout(async () => {
+    async function loadIndex() {
 
       try {
 
-        setLoading(true)
-
         const response = await fetch(
-          "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContacts_2/execute?q=" +
-          encodeURIComponent(query)
+          "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContactIndex/execute"
         )
 
         const data = await response.json()
 
-        setContacts(data)
+        const normalised = data.map(c => ({
+          ...c,
+          search: c.search.toLowerCase()
+        }))
+
+        setContactIndex(normalised)
 
       } catch (err) {
 
-        console.error("Search error:", err)
-        setContacts([])
+        console.error("Failed to load contact index:", err)
 
       } finally {
 
@@ -83,11 +84,30 @@ function App() {
 
       }
 
-    }, 300)
+    }
 
-    return () => clearTimeout(timeout)
+    loadIndex()
 
-  }, [query])
+  }, [])
+
+  // local search
+
+  useEffect(() => {
+
+    if (!query) {
+      setResults([])
+      return
+    }
+
+    const q = query.toLowerCase()
+
+    const filtered = contactIndex
+      .filter(c => c.search.includes(q))
+      .slice(0, 10)
+
+    setResults(filtered)
+
+  }, [query, contactIndex])
 
   return (
     <div style={{
@@ -98,83 +118,93 @@ function App() {
 
       <h1>MTD Onboarding Tool</h1>
 
-      <div style={{
-        width: "320px",
-        margin: "0 auto",
-        position: "relative"
-      }}>
+      {loading && (
+        <div>Loading contacts...</div>
+      )}
 
-        <input
-          type="text"
-          placeholder="Search client..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          style={{
-            width: "100%",
-            padding: "10px",
-            fontSize: "14px",
-            borderRadius: "6px",
-            border: "1px solid #ccc"
-          }}
-        />
+      {!loading && (
 
-        {(contacts.length > 0 || loading) && (
+        <div style={{
+          width: "320px",
+          margin: "0 auto",
+          position: "relative"
+        }}>
 
-          <div style={{
-            position: "absolute",
-            top: "42px",
-            left: 0,
-            right: 0,
-            background: "white",
-            border: "1px solid #ddd",
-            borderRadius: "6px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-            textAlign: "left",
-            zIndex: 10
-          }}>
+          <input
+            type="text"
+            placeholder="Search client..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            style={{
+              width: "100%",
+              padding: "10px",
+              fontSize: "14px",
+              borderRadius: "6px",
+              border: "1px solid #ccc"
+            }}
+          />
 
-            {loading && (
-              <div style={{ padding: "10px", color: "#777" }}>
-                Searching...
-              </div>
-            )}
+          {(results.length > 0) && (
 
-            {!loading && contacts.map((c, i) => (
+            <div style={{
+              position: "absolute",
+              top: "42px",
+              left: 0,
+              right: 0,
+              background: "white",
+              border: "1px solid #ddd",
+              borderRadius: "6px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              textAlign: "left",
+              zIndex: 10
+            }}>
 
-              <div
-                key={i}
-                onClick={() => selectContact(c)}
-                onMouseEnter={() => setHoverIndex(i)}
-                onMouseLeave={() => setHoverIndex(null)}
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #eee",
-                  cursor: "pointer",
-                  backgroundColor: hoverIndex === i ? "#f5f7fa" : "white"
-                }}
-              >
+              {results.map((c, i) => {
 
-                <div style={{ fontWeight: "500" }}>
-                  {c.name}
-                </div>
+                const parts = c.search.split("|")
+                const name = parts[0].trim()
+                const details = parts.slice(1).join("|").trim()
 
-                <div style={{
-                  fontSize: "12px",
-                  color: "#666"
-                }}>
-                  {c.email}
-                </div>
+                return (
 
-              </div>
+                  <div
+                    key={c.id}
+                    onClick={() => selectContact(c)}
+                    onMouseEnter={() => setHoverIndex(i)}
+                    onMouseLeave={() => setHoverIndex(null)}
+                    style={{
+                      padding: "10px",
+                      borderBottom: "1px solid #eee",
+                      cursor: "pointer",
+                      backgroundColor: hoverIndex === i ? "#f5f7fa" : "white"
+                    }}
+                  >
 
-            ))}
+                    <div style={{ fontWeight: "500" }}>
+                      {name}
+                    </div>
 
-          </div>
+                    <div style={{
+                      fontSize: "12px",
+                      color: "#666"
+                    }}>
+                      {details}
+                    </div>
 
-        )}
+                  </div>
 
-      </div>
+                )
+
+              })}
+
+            </div>
+
+          )}
+
+        </div>
+
+      )}
 
     </div>
   )
