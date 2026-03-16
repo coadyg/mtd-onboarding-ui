@@ -163,7 +163,7 @@ useEffect(() => {
 
     console.log("Onboarding session created:", data)
 
-    alert("Onboarding session created: " + data.sessionId)
+    window.location.href = "/onboarding/" + data.sessionId
 
   } catch (err) {
 
