@@ -78,10 +78,11 @@ function App() {
 
         const data = await response.json()
 
-        const normalised = data.map(c => ({
-          ...c,
-          search: c.search.toLowerCase()
-        }))
+const normalised = data.map(c => ({
+  ...c,
+  raw: c.search,
+  search: c.search.toLowerCase()
+}))
 
         setContactIndex(normalised)
 
@@ -225,11 +226,11 @@ function App() {
             }}>
 
               <div style={{ fontWeight: "600", marginBottom: "6px" }}>
-                {selectedContact.search.split("|")[0].trim()}
+                {selectedContact.raw.split("|")[0].trim()}
               </div>
 
               <div style={{ fontSize: "13px", color: "#666", marginBottom: "16px" }}>
-                {selectedContact.search.split("|").slice(1).join("|").trim()}
+                {selectedContact.raw.split("|").slice(1).join("|").trim()}
               </div>
 
               <button
