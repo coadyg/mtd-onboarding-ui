@@ -8,6 +8,7 @@ function App() {
   const [query, setQuery] = useState("")
   const [hoverIndex, setHoverIndex] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [selectedContact, setSelectedContact] = useState(null)
 
   function selectContact(contact) {
 
@@ -16,6 +17,16 @@ function App() {
     const name = contact.search.split("|")[0].trim()
 
     setQuery(name)
+    setResults([])
+    setHoverIndex(null)
+    setSelectedContact(contact)
+
+  }
+
+  function clearSelection() {
+
+    setSelectedContact(null)
+    setQuery("")
     setResults([])
     setHoverIndex(null)
 
@@ -197,6 +208,50 @@ function App() {
                 )
 
               })}
+
+            </div>
+
+          )}
+
+          {selectedContact && (
+
+            <div style={{
+              marginTop: "30px",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              padding: "20px",
+              textAlign: "left",
+              background: "#fafafa"
+            }}>
+
+              <div style={{ fontWeight: "600", marginBottom: "6px" }}>
+                {selectedContact.search.split("|")[0].trim()}
+              </div>
+
+              <div style={{ fontSize: "13px", color: "#666", marginBottom: "16px" }}>
+                {selectedContact.search.split("|").slice(1).join("|").trim()}
+              </div>
+
+              <button
+                style={{
+                  padding: "8px 12px",
+                  marginRight: "10px",
+                  cursor: "pointer"
+                }}
+                onClick={() => console.log("Start onboarding for:", selectedContact.id)}
+              >
+                Start MTD onboarding
+              </button>
+
+              <button
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer"
+                }}
+                onClick={clearSelection}
+              >
+                Clear
+              </button>
 
             </div>
 
