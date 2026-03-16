@@ -10,6 +10,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [selectedContact, setSelectedContact] = useState(null)
   const searchRef = useRef(null)
+  const [sessions, setSessions] = useState([])
 
   function selectContact(contact) {
 
@@ -152,6 +153,8 @@ useEffect(() => {
 
   async function startOnboarding() {
 
+  if (!selectedContact) return
+
   try {
 
     const response = await fetch(
@@ -172,6 +175,31 @@ useEffect(() => {
   }
 
 }
+  async function loadSessions() {
+
+  try {
+
+    const response = await fetch(
+      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessions/execute"
+    )
+
+    const data = await response.json()
+
+    setSessions(data)
+
+  } catch (err) {
+
+    console.error("Failed to load sessions:", err)
+
+  }
+
+}
+
+  useEffect(() => {
+
+  loadSessions()
+
+}, [])
 
   return (
     <div style={{
@@ -323,9 +351,44 @@ useEffect(() => {
         </div>
 
       )}
+      <div style={{ marginTop: "60px" }}>
+
+  <h3>Recent onboarding sessions</h3>
+{sessions.length === 0 ? (
+
+  <div style={{ color: "#777", marginTop: "10px" }}>
+    No onboarding sessions yet
+  </div>
+
+) : (
+
+  sessions.map(session => (
+
+    <div
+      key={session.sessionId}
+      style={{
+        padding: "10px",
+        borderBottom: "1px solid #eee"
+      }}
+    >
+
+      {session.contactId}
+
+      <div style={{ fontSize: "12px", color: "#666" }}>
+        {session.createdAt}
+      </div>
+
+    </div>
+
+  ))
+
+)}
+
+</div>
 
     </div>
   )
 }
+
 
 export default App
