@@ -159,9 +159,16 @@ useEffect(() => {
 
       <h1>MTD Onboarding Tool</h1>
 
-      {loading && (
-        <div>Loading contacts...</div>
-      )}
+{loading && (
+  <div style={{
+    width: "320px",
+    margin: "40px auto"
+  }}>
+    <div className="shimmer" />
+    <div className="shimmer" />
+    <div className="shimmer" />
+  </div>
+)}
 
       {!loading && (
 
