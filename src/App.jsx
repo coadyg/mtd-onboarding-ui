@@ -1,5 +1,9 @@
+import { Routes, Route, useNavigate } from "react-router-dom"
+import Onboarding from "./Onboarding"
 import { useState, useEffect, useRef } from "react"
 import "./App.css"
+
+
 
 function App() {
 
@@ -11,6 +15,9 @@ function App() {
   const [selectedContact, setSelectedContact] = useState(null)
   const searchRef = useRef(null)
   const [sessions, setSessions] = useState([])
+  const navigate = useNavigate()
+
+
 
   function selectContact(contact) {
 
@@ -25,6 +32,8 @@ function App() {
 
   }
 
+
+
   function clearSelection() {
 
     setSelectedContact(null)
@@ -33,6 +42,8 @@ function App() {
     setHoverIndex(null)
 
   }
+
+
 
   function handleKeyDown(e) {
 
@@ -66,7 +77,7 @@ function App() {
 
   }
 
-  // load contact index once
+
 
   useEffect(() => {
 
@@ -80,11 +91,11 @@ function App() {
 
         const data = await response.json()
 
-const normalised = data.map(c => ({
-  ...c,
-  raw: c.search,
-  search: c.search.toLowerCase()
-}))
+        const normalised = data.map(c => ({
+          ...c,
+          raw: c.search,
+          search: c.search.toLowerCase()
+        }))
 
         setContactIndex(normalised)
 
@@ -104,104 +115,173 @@ const normalised = data.map(c => ({
 
   }, [])
 
-  // local search
+
 
   useEffect(() => {
 
-  function handleClickOutside(event) {
+    function handleClickOutside(event) {
 
-    if (
-      searchRef.current &&
-      !searchRef.current.contains(event.target)
-    ) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target)
+      ) {
+        setResults([])
+        setHoverIndex(null)
+      }
+
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+  }, [])
+
+
+
+  useEffect(() => {
+
+    if (selectedContact) {
       setResults([])
-      setHoverIndex(null)
+      return
+    }
+
+    if (!query) {
+      setResults([])
+      return
+    }
+
+    const q = query.toLowerCase()
+
+    const filtered = contactIndex
+      .filter(c => c.search.includes(q))
+      .slice(0, 10)
+
+    setResults(filtered)
+
+  }, [query, contactIndex, selectedContact])
+
+
+
+  async function startOnboarding() {
+
+    if (!selectedContact) return
+
+    try {
+
+      const response = await fetch(
+        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSession/execute?contactId=" +
+        selectedContact.id
+      )
+
+      const data = await response.json()
+
+      console.log("Onboarding session created:", data)
+
+      navigate("/onboarding/" + data.sessionId)
+
+    } catch (err) {
+
+      console.error("Failed to start onboarding:", err)
+
     }
 
   }
 
-  document.addEventListener("mousedown", handleClickOutside)
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside)
-  }
 
-}, [])
-
-useEffect(() => {
-
-  // stop search if a contact has already been chosen
-  if (selectedContact) {
-    setResults([])
-    return
-  }
-
-  if (!query) {
-    setResults([])
-    return
-  }
-
-  const q = query.toLowerCase()
-
-  const filtered = contactIndex
-    .filter(c => c.search.includes(q))
-    .slice(0, 10)
-
-  setResults(filtered)
-
-}, [query, contactIndex, selectedContact])
-
-  async function startOnboarding() {
-
-  if (!selectedContact) return
-
-  try {
-
-    const response = await fetch(
-      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSession/execute?contactId=" +
-      selectedContact.id
-    )
-
-    const data = await response.json()
-
-    console.log("Onboarding session created:", data)
-
-    window.location.href = "/onboarding/" + data.sessionId
-
-  } catch (err) {
-
-    console.error("Failed to start onboarding:", err)
-
-  }
-
-}
   async function loadSessions() {
 
-  try {
+    try {
 
-    const response = await fetch(
-      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessions/execute"
-    )
+      const response = await fetch(
+        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessions/execute"
+      )
 
-    const data = await response.json()
+      const data = await response.json()
 
-    setSessions(data)
+      setSessions(data)
 
-  } catch (err) {
+    } catch (err) {
 
-    console.error("Failed to load sessions:", err)
+      console.error("Failed to load sessions:", err)
+
+    }
 
   }
 
-}
+
 
   useEffect(() => {
 
-  loadSessions()
+    loadSessions()
 
-}, [])
+  }, [])
+
+
 
   return (
+
+    <Routes>
+
+      <Route
+        path="/"
+        element={
+          <Home
+            loading={loading}
+            searchRef={searchRef}
+            query={query}
+            setQuery={setQuery}
+            handleKeyDown={handleKeyDown}
+            results={results}
+            hoverIndex={hoverIndex}
+            setHoverIndex={setHoverIndex}
+            selectContact={selectContact}
+            selectedContact={selectedContact}
+            clearSelection={clearSelection}
+            startOnboarding={startOnboarding}
+            sessions={sessions}
+          />
+        }
+      />
+
+      <Route
+        path="/onboarding/:sessionId"
+        element={<Onboarding />}
+      />
+
+    </Routes>
+
+  )
+
+}
+
+
+
+function Home(props) {
+
+  const {
+    loading,
+    searchRef,
+    query,
+    setQuery,
+    handleKeyDown,
+    results,
+    hoverIndex,
+    setHoverIndex,
+    selectContact,
+    selectedContact,
+    clearSelection,
+    startOnboarding,
+    sessions
+  } = props
+
+
+
+  return (
+
     <div style={{
       paddingTop: "120px",
       fontFamily: "Arial",
@@ -210,27 +290,31 @@ useEffect(() => {
 
       <h1>MTD Onboarding Tool</h1>
 
-{loading && (
-  <div style={{
-    width: "320px",
-    margin: "40px auto"
-  }}>
-    <div className="shimmer" />
-    <div className="shimmer" />
-    <div className="shimmer" />
-  </div>
-)}
+
+
+      {loading && (
+        <div style={{
+          width: "320px",
+          margin: "40px auto"
+        }}>
+          <div className="shimmer" />
+          <div className="shimmer" />
+          <div className="shimmer" />
+        </div>
+      )}
+
+
 
       {!loading && (
 
-<div
-  ref={searchRef}
-  style={{
-    width: "320px",
-    margin: "0 auto",
-    position: "relative"
-  }}
->
+        <div
+          ref={searchRef}
+          style={{
+            width: "320px",
+            margin: "0 auto",
+            position: "relative"
+          }}
+        >
 
           <input
             type="text"
@@ -246,6 +330,8 @@ useEffect(() => {
               border: "1px solid #ccc"
             }}
           />
+
+
 
           {(results.length > 0) && (
 
@@ -304,6 +390,8 @@ useEffect(() => {
 
           )}
 
+
+
           {selectedContact && (
 
             <div style={{
@@ -351,44 +439,51 @@ useEffect(() => {
         </div>
 
       )}
+
+
+
       <div style={{ marginTop: "60px" }}>
 
-  <h3>Recent onboarding sessions</h3>
-{sessions.length === 0 ? (
+        <h3>Recent onboarding sessions</h3>
 
-  <div style={{ color: "#777", marginTop: "10px" }}>
-    No onboarding sessions yet
-  </div>
+        {sessions.length === 0 ? (
 
-) : (
+          <div style={{ color: "#777", marginTop: "10px" }}>
+            No onboarding sessions yet
+          </div>
 
-  sessions.map(session => (
+        ) : (
 
-    <div
-      key={session.sessionId}
-      style={{
-        padding: "10px",
-        borderBottom: "1px solid #eee"
-      }}
-    >
+          sessions.map(session => (
 
-      {session.contactId}
+            <div
+              key={session.sessionId}
+              style={{
+                padding: "10px",
+                borderBottom: "1px solid #eee"
+              }}
+            >
 
-      <div style={{ fontSize: "12px", color: "#666" }}>
-        {session.createdAt}
+              {session.contactId}
+
+              <div style={{ fontSize: "12px", color: "#666" }}>
+                {session.createdAt}
+              </div>
+
+            </div>
+
+          ))
+
+        )}
+
       </div>
 
     </div>
 
-  ))
-
-)}
-
-</div>
-
-    </div>
   )
+
 }
+
 
 
 export default App
