@@ -197,7 +197,7 @@ function App() {
     try {
 
       const response = await fetch(
-        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessions/execute"
+        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessionsV2/execute"
       )
 
       const data = await response.json()
