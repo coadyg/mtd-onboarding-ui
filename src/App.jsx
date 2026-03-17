@@ -172,7 +172,7 @@ function App() {
     try {
 
       const response = await fetch(
-        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSession/execute?contactId=" +
+        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSessionV2/execute?contactId=" +
         selectedContact.id
       )
 
