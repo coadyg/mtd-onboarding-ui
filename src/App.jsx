@@ -5,6 +5,7 @@ import "./App.css"
 
 function App() {
 
+  const [sessionsLoading, setSessionsLoading] = useState(true)
   const [contactIndex, setContactIndex] = useState([])
   const [results, setResults] = useState([])
   const [query, setQuery] = useState("")
@@ -178,25 +179,29 @@ function App() {
 
   }
 
-  async function loadSessions() {
+async function loadSessions() {
 
-    try {
+  try {
 
-      const response = await fetch(
-        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessionsV2/execute"
-      )
+    const response = await fetch(
+      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessionsV2/execute"
+    )
 
-      const data = await response.json()
+    const data = await response.json()
 
-      setSessions(data)
+    setSessions(data)
 
-    } catch (err) {
+  } catch (err) {
 
-      console.error("Failed to load sessions:", err)
+    console.error("Failed to load sessions:", err)
 
-    }
+  } finally {
+
+    setSessionsLoading(false)
 
   }
+
+}
 
   useEffect(() => {
 
@@ -212,20 +217,21 @@ function App() {
         path="/"
         element={
           <Home
-            loading={loading}
-            searchRef={searchRef}
-            query={query}
-            setQuery={setQuery}
-            handleKeyDown={handleKeyDown}
-            results={results}
-            hoverIndex={hoverIndex}
-            setHoverIndex={setHoverIndex}
-            selectContact={selectContact}
-            selectedContact={selectedContact}
-            clearSelection={clearSelection}
-            startOnboarding={startOnboarding}
-            sessions={sessions}
-          />
+  loading={loading}
+  sessionsLoading={sessionsLoading}
+  searchRef={searchRef}
+  query={query}
+  setQuery={setQuery}
+  handleKeyDown={handleKeyDown}
+  results={results}
+  hoverIndex={hoverIndex}
+  setHoverIndex={setHoverIndex}
+  selectContact={selectContact}
+  selectedContact={selectedContact}
+  clearSelection={clearSelection}
+  startOnboarding={startOnboarding}
+  sessions={sessions}
+/>
         }
       />
 
@@ -244,6 +250,7 @@ function Home(props) {
 
   const {
     loading,
+    sessionsLoading,
     searchRef,
     query,
     setQuery,
@@ -416,37 +423,39 @@ function Home(props) {
 
         <h3>Recent onboarding sessions</h3>
 
-        {sessions.length === 0 ? (
+{sessionsLoading ? (
 
-          <div style={{ color: "#777", marginTop: "10px" }}>
-            No onboarding sessions yet
-          </div>
+  <div style={{ color: "#777", marginTop: "10px" }}>
+    Loading sessions...
+  </div>
 
-        ) : (
+) : sessions.length === 0 ? (
 
-          sessions.map(session => (
+  <div style={{ color: "#777", marginTop: "10px" }}>
+    No onboarding sessions yet
+  </div>
 
-            <div
-              key={session.sessionId}
-              onClick={() => navigate("/onboarding/" + session.sessionId)}
-              style={{
-                padding: "10px",
-                borderBottom: "1px solid #eee",
-                cursor: "pointer"
-              }}
-            >
+) : (
 
-              {session.contactName}
+  sessions.map(session => (
+    <div
+      key={session.sessionId}
+      onClick={() => navigate("/onboarding/" + session.sessionId)}
+      style={{
+        padding: "10px",
+        borderBottom: "1px solid #eee",
+        cursor: "pointer"
+      }}
+    >
+      {session.contactName}
 
-              <div style={{ fontSize: "12px", color: "#666" }}>
-                {session.createdAt}
-              </div>
+      <div style={{ fontSize: "12px", color: "#666" }}>
+        {session.createdAt}
+      </div>
+    </div>
+  ))
 
-            </div>
-
-          ))
-
-        )}
+)}
 
       </div>
 
