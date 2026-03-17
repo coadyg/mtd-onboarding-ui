@@ -3,8 +3,6 @@ import Onboarding from "./Onboarding"
 import { useState, useEffect, useRef } from "react"
 import "./App.css"
 
-
-
 function App() {
 
   const [contactIndex, setContactIndex] = useState([])
@@ -16,8 +14,6 @@ function App() {
   const searchRef = useRef(null)
   const [sessions, setSessions] = useState([])
   const navigate = useNavigate()
-
-
 
   function selectContact(contact) {
 
@@ -32,8 +28,6 @@ function App() {
 
   }
 
-
-
   function clearSelection() {
 
     setSelectedContact(null)
@@ -42,8 +36,6 @@ function App() {
     setHoverIndex(null)
 
   }
-
-
 
   function handleKeyDown(e) {
 
@@ -76,8 +68,6 @@ function App() {
     }
 
   }
-
-
 
   useEffect(() => {
 
@@ -115,8 +105,6 @@ function App() {
 
   }, [])
 
-
-
   useEffect(() => {
 
     function handleClickOutside(event) {
@@ -138,8 +126,6 @@ function App() {
     }
 
   }, [])
-
-
 
   useEffect(() => {
 
@@ -163,17 +149,19 @@ function App() {
 
   }, [query, contactIndex, selectedContact])
 
-
-
   async function startOnboarding() {
 
     if (!selectedContact) return
 
     try {
 
+      const name = selectedContact.raw.split("|")[0].trim()
+
       const response = await fetch(
         "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSessionV2/execute?contactId=" +
-        selectedContact.id
+        selectedContact.id +
+        "&contactName=" +
+        encodeURIComponent(name)
       )
 
       const data = await response.json()
@@ -189,8 +177,6 @@ function App() {
     }
 
   }
-
-
 
   async function loadSessions() {
 
@@ -212,15 +198,11 @@ function App() {
 
   }
 
-
-
   useEffect(() => {
 
     loadSessions()
 
   }, [])
-
-
 
   return (
 
@@ -258,8 +240,6 @@ function App() {
 
 }
 
-
-
 function Home(props) {
 
   const {
@@ -278,7 +258,7 @@ function Home(props) {
     sessions
   } = props
 
-
+  const navigate = useNavigate()
 
   return (
 
@@ -290,8 +270,6 @@ function Home(props) {
 
       <h1>MTD Onboarding Tool</h1>
 
-
-
       {loading && (
         <div style={{
           width: "320px",
@@ -302,8 +280,6 @@ function Home(props) {
           <div className="shimmer" />
         </div>
       )}
-
-
 
       {!loading && (
 
@@ -330,8 +306,6 @@ function Home(props) {
               border: "1px solid #ccc"
             }}
           />
-
-
 
           {(results.length > 0) && (
 
@@ -390,8 +364,6 @@ function Home(props) {
 
           )}
 
-
-
           {selectedContact && (
 
             <div style={{
@@ -440,8 +412,6 @@ function Home(props) {
 
       )}
 
-
-
       <div style={{ marginTop: "60px" }}>
 
         <h3>Recent onboarding sessions</h3>
@@ -458,13 +428,15 @@ function Home(props) {
 
             <div
               key={session.sessionId}
+              onClick={() => navigate("/onboarding/" + session.sessionId)}
               style={{
                 padding: "10px",
-                borderBottom: "1px solid #eee"
+                borderBottom: "1px solid #eee",
+                cursor: "pointer"
               }}
             >
 
-              {session.contactId}
+              {session.contactName}
 
               <div style={{ fontSize: "12px", color: "#666" }}>
                 {session.createdAt}
@@ -483,7 +455,5 @@ function Home(props) {
   )
 
 }
-
-
 
 export default App
