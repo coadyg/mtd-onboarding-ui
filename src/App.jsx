@@ -16,6 +16,18 @@ function App() {
   const [sessions, setSessions] = useState([])
   const navigate = useNavigate()
 
+  const catalystRef = useRef(null)
+
+  useEffect(() => {
+
+    const catalyst = window.catalyst.initialize()
+    catalystRef.current = catalyst
+
+    catalyst.auth.isUserAuthenticated()
+      .catch(() => catalyst.auth.signIn())
+
+  }, [])
+
   function selectContact(contact) {
 
     console.log("Selected contact:", contact)
@@ -76,9 +88,9 @@ function App() {
 
       try {
 
-        const response = await fetch(
-          "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getContactIndex/execute"
-        )
+        const fn = catalystRef.current.function.functionId("getContactIndex")
+
+        const response = await fn.execute()
 
         const data = await response.json()
 
@@ -102,7 +114,7 @@ function App() {
 
     }
 
-    loadIndex()
+    if (catalystRef.current) loadIndex()
 
   }, [])
 
@@ -158,12 +170,14 @@ function App() {
 
       const name = selectedContact.raw.split("|")[0].trim()
 
-      const response = await fetch(
-        "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/createOnboardingSessionV2/execute?contactId=" +
-        selectedContact.id +
-        "&contactName=" +
-        encodeURIComponent(name)
-      )
+      const fn = catalystRef.current.function.functionId("createOnboardingSessionV2")
+
+      const response = await fn.execute({
+        args: {
+          contactId: selectedContact.id,
+          contactName: name
+        }
+      })
 
       const data = await response.json()
 
@@ -179,33 +193,33 @@ function App() {
 
   }
 
-async function loadSessions() {
+  async function loadSessions() {
 
-  try {
+    try {
 
-    const response = await fetch(
-      "https://mtd-onboarding-20104860254.development.catalystserverless.eu/server/getOnboardingSessionsV2/execute"
-    )
+      const fn = catalystRef.current.function.functionId("getOnboardingSessionsV2")
 
-    const data = await response.json()
+      const response = await fn.execute()
 
-    setSessions(data)
+      const data = await response.json()
 
-  } catch (err) {
+      setSessions(data)
 
-    console.error("Failed to load sessions:", err)
+    } catch (err) {
 
-  } finally {
+      console.error("Failed to load sessions:", err)
 
-    setSessionsLoading(false)
+    } finally {
+
+      setSessionsLoading(false)
+
+    }
 
   }
 
-}
-
   useEffect(() => {
 
-    loadSessions()
+    if (catalystRef.current) loadSessions()
 
   }, [])
 
@@ -217,21 +231,21 @@ async function loadSessions() {
         path="/"
         element={
           <Home
-  loading={loading}
-  sessionsLoading={sessionsLoading}
-  searchRef={searchRef}
-  query={query}
-  setQuery={setQuery}
-  handleKeyDown={handleKeyDown}
-  results={results}
-  hoverIndex={hoverIndex}
-  setHoverIndex={setHoverIndex}
-  selectContact={selectContact}
-  selectedContact={selectedContact}
-  clearSelection={clearSelection}
-  startOnboarding={startOnboarding}
-  sessions={sessions}
-/>
+            loading={loading}
+            sessionsLoading={sessionsLoading}
+            searchRef={searchRef}
+            query={query}
+            setQuery={setQuery}
+            handleKeyDown={handleKeyDown}
+            results={results}
+            hoverIndex={hoverIndex}
+            setHoverIndex={setHoverIndex}
+            selectContact={selectContact}
+            selectedContact={selectedContact}
+            clearSelection={clearSelection}
+            startOnboarding={startOnboarding}
+            sessions={sessions}
+          />
         }
       />
 
@@ -371,93 +385,9 @@ function Home(props) {
 
           )}
 
-          {selectedContact && (
-
-            <div style={{
-              marginTop: "30px",
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "20px",
-              textAlign: "left",
-              background: "#fafafa"
-            }}>
-
-              <div style={{ fontWeight: "600", marginBottom: "6px" }}>
-                {selectedContact.raw.split("|")[0].trim()}
-              </div>
-
-              <div style={{ fontSize: "13px", color: "#666", marginBottom: "16px" }}>
-                {selectedContact.raw.split("|").slice(1).join("|").trim()}
-              </div>
-
-              <button
-                style={{
-                  padding: "8px 12px",
-                  marginRight: "10px",
-                  cursor: "pointer"
-                }}
-                onClick={startOnboarding}
-              >
-                Start MTD onboarding
-              </button>
-
-              <button
-                style={{
-                  padding: "8px 12px",
-                  cursor: "pointer"
-                }}
-                onClick={clearSelection}
-              >
-                Clear
-              </button>
-
-            </div>
-
-          )}
-
         </div>
 
       )}
-
-      <div style={{ marginTop: "60px" }}>
-
-        <h3>Recent onboarding sessions</h3>
-
-{sessionsLoading ? (
-
-  <div style={{ color: "#777", marginTop: "10px" }}>
-    Loading sessions...
-  </div>
-
-) : sessions.length === 0 ? (
-
-  <div style={{ color: "#777", marginTop: "10px" }}>
-    No onboarding sessions yet
-  </div>
-
-) : (
-
-  sessions.map(session => (
-    <div
-      key={session.sessionId}
-      onClick={() => navigate("/onboarding/" + session.sessionId)}
-      style={{
-        padding: "10px",
-        borderBottom: "1px solid #eee",
-        cursor: "pointer"
-      }}
-    >
-      {session.contactName}
-
-      <div style={{ fontSize: "12px", color: "#666" }}>
-        {session.createdAt}
-      </div>
-    </div>
-  ))
-
-)}
-
-      </div>
 
     </div>
 
