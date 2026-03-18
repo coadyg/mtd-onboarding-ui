@@ -12,6 +12,8 @@ function App() {
   const [hoverIndex, setHoverIndex] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedContact, setSelectedContact] = useState(null)
+  const [user, setUser] = useState(null)
+
   const searchRef = useRef(null)
   const [sessions, setSessions] = useState([])
   const navigate = useNavigate()
@@ -23,10 +25,84 @@ function App() {
     const catalyst = window.catalyst.initialize()
     catalystRef.current = catalyst
 
-    catalyst.auth.isUserAuthenticated()
-      .catch(() => catalyst.auth.signIn())
+    async function checkAuth() {
+
+      try {
+
+        const currentUser = await catalyst.auth.getCurrentUser()
+
+        console.log("Logged in user:", currentUser)
+
+        setUser(currentUser)
+
+        loadIndex()
+        loadSessions()
+
+      } catch {
+
+        catalyst.auth.signIn()
+
+      }
+
+    }
+
+    checkAuth()
 
   }, [])
+
+  async function loadIndex() {
+
+    try {
+
+      const fn = catalystRef.current.function.functionId("getContactIndex")
+
+      const response = await fn.execute()
+
+      const data = await response.json()
+
+      const normalised = data.map(c => ({
+        ...c,
+        raw: c.search,
+        search: c.search.toLowerCase()
+      }))
+
+      setContactIndex(normalised)
+
+    } catch (err) {
+
+      console.error("Failed to load contact index:", err)
+
+    } finally {
+
+      setLoading(false)
+
+    }
+
+  }
+
+  async function loadSessions() {
+
+    try {
+
+      const fn = catalystRef.current.function.functionId("getOnboardingSessionsV2")
+
+      const response = await fn.execute()
+
+      const data = await response.json()
+
+      setSessions(data)
+
+    } catch (err) {
+
+      console.error("Failed to load sessions:", err)
+
+    } finally {
+
+      setSessionsLoading(false)
+
+    }
+
+  }
 
   function selectContact(contact) {
 
@@ -81,42 +157,6 @@ function App() {
     }
 
   }
-
-  useEffect(() => {
-
-    async function loadIndex() {
-
-      try {
-
-        const fn = catalystRef.current.function.functionId("getContactIndex")
-
-        const response = await fn.execute()
-
-        const data = await response.json()
-
-        const normalised = data.map(c => ({
-          ...c,
-          raw: c.search,
-          search: c.search.toLowerCase()
-        }))
-
-        setContactIndex(normalised)
-
-      } catch (err) {
-
-        console.error("Failed to load contact index:", err)
-
-      } finally {
-
-        setLoading(false)
-
-      }
-
-    }
-
-    if (catalystRef.current) loadIndex()
-
-  }, [])
 
   useEffect(() => {
 
@@ -193,36 +233,6 @@ function App() {
 
   }
 
-  async function loadSessions() {
-
-    try {
-
-      const fn = catalystRef.current.function.functionId("getOnboardingSessionsV2")
-
-      const response = await fn.execute()
-
-      const data = await response.json()
-
-      setSessions(data)
-
-    } catch (err) {
-
-      console.error("Failed to load sessions:", err)
-
-    } finally {
-
-      setSessionsLoading(false)
-
-    }
-
-  }
-
-  useEffect(() => {
-
-    if (catalystRef.current) loadSessions()
-
-  }, [])
-
   return (
 
     <Routes>
@@ -231,6 +241,7 @@ function App() {
         path="/"
         element={
           <Home
+            user={user}
             loading={loading}
             sessionsLoading={sessionsLoading}
             searchRef={searchRef}
@@ -263,8 +274,8 @@ function App() {
 function Home(props) {
 
   const {
+    user,
     loading,
-    sessionsLoading,
     searchRef,
     query,
     setQuery,
@@ -272,14 +283,8 @@ function Home(props) {
     results,
     hoverIndex,
     setHoverIndex,
-    selectContact,
-    selectedContact,
-    clearSelection,
-    startOnboarding,
-    sessions
+    selectContact
   } = props
-
-  const navigate = useNavigate()
 
   return (
 
@@ -288,6 +293,12 @@ function Home(props) {
       fontFamily: "Arial",
       textAlign: "center"
     }}>
+
+      {user && (
+        <div style={{ fontSize: "13px", marginBottom: "10px", color: "#666" }}>
+          Logged in as: {user.first_name} {user.last_name} ({user.email_id})
+        </div>
+      )}
 
       <h1>MTD Onboarding Tool</h1>
 
