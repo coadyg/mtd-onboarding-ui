@@ -20,11 +20,13 @@ function App() {
 
   const catalystRef = useRef(null)
 
-  useEffect(() => {
+
+useEffect(() => {
 
   const catalyst = window.catalyst.initialize()
   catalystRef.current = catalyst
-    async function checkAuth() {
+
+  async function checkAuth() {
 
       try {
 
@@ -34,8 +36,8 @@ function App() {
 
         setUser(currentUser)
 
-        loadIndex()
-        loadSessions()
+await loadIndex()
+await loadSessions()
 
       } catch {
 
