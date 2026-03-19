@@ -233,6 +233,7 @@ function App() {
         path="/onboarding/:sessionId"
         element={<Onboarding />}
       />
+      <Route path="/login" element={<Login />} />
 
     </Routes>
 
