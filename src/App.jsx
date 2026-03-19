@@ -12,52 +12,21 @@ function App() {
   const [hoverIndex, setHoverIndex] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedContact, setSelectedContact] = useState(null)
-  const [user, setUser] = useState(null)
 
   const searchRef = useRef(null)
   const [sessions, setSessions] = useState([])
   const navigate = useNavigate()
 
-  const catalystRef = useRef(null)
-
-
-useEffect(() => {
-
-  const catalyst = window.catalyst.initialize()
-  catalystRef.current = catalyst
-
-  async function checkAuth() {
-
-      try {
-
-        const currentUser = await catalyst.auth.getCurrentUser()
-
-        console.log("Logged in user:", currentUser)
-
-        setUser(currentUser)
-
-await loadIndex()
-await loadSessions()
-
-      } catch {
-
-        catalyst.auth.signIn()
-
-      }
-
-    }
-
-    checkAuth()
-
+  useEffect(() => {
+    loadIndex()
+    loadSessions()
   }, [])
 
   async function loadIndex() {
 
     try {
 
-      const fn = catalystRef.current.function.functionId("getContactIndex")
-
-      const response = await fn.execute()
+      const response = await fetch("/server/getContactIndex")
 
       const data = await response.json()
 
@@ -85,9 +54,7 @@ await loadSessions()
 
     try {
 
-      const fn = catalystRef.current.function.functionId("getOnboardingSessionsV2")
-
-      const response = await fn.execute()
+      const response = await fetch("/server/getOnboardingSessionsV2")
 
       const data = await response.json()
 
@@ -211,13 +178,15 @@ await loadSessions()
 
       const name = selectedContact.raw.split("|")[0].trim()
 
-      const fn = catalystRef.current.function.functionId("createOnboardingSessionV2")
-
-      const response = await fn.execute({
-        args: {
+      const response = await fetch("/server/createOnboardingSessionV2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
           contactId: selectedContact.id,
           contactName: name
-        }
+        })
       })
 
       const data = await response.json()
@@ -242,7 +211,6 @@ await loadSessions()
         path="/"
         element={
           <Home
-            user={user}
             loading={loading}
             sessionsLoading={sessionsLoading}
             searchRef={searchRef}
@@ -275,7 +243,6 @@ await loadSessions()
 function Home(props) {
 
   const {
-    user,
     loading,
     searchRef,
     query,
@@ -294,12 +261,6 @@ function Home(props) {
       fontFamily: "Arial",
       textAlign: "center"
     }}>
-
-      {user && (
-        <div style={{ fontSize: "13px", marginBottom: "10px", color: "#666" }}>
-          Logged in as: {user.first_name} {user.last_name} ({user.email_id})
-        </div>
-      )}
 
       <h1>MTD Onboarding Tool</h1>
 
