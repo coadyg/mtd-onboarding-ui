@@ -22,9 +22,10 @@ function App() {
 
   useEffect(() => {
 
-    const catalyst = window.catalyst.initialize()
-    catalystRef.current = catalyst
+  if (!window.catalyst) return
 
+  const catalyst = window.catalyst.initialize()
+  catalystRef.current = catalyst
     async function checkAuth() {
 
       try {
