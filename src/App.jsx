@@ -234,7 +234,7 @@ useEffect(() => {
     <Routes>
 
       <Route
-        path="/"
+        path=""
         element={
           <Home
             loading={loading}
