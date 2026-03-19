@@ -22,7 +22,7 @@ function App() {
 
   useEffect(() => {
 
-  const catalyst = window.ZOHO.CATALYST
+  const catalyst = window.catalyst.initialize()
   catalystRef.current = catalyst
     async function checkAuth() {
 
