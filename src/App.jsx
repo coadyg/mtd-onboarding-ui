@@ -74,33 +74,29 @@ function App() {
 
   }
 
-  useEffect(() => {
+useEffect(() => {
 
-    async function checkSession() {
+  async function checkSession() {
 
-      try {
+    if (!window.catalyst) return
 
-        const response = await fetch("/server/getCurrentUser")
+    try {
 
-        if (response.status !== 200) {
-          navigate("login")
-          return
-        }
+      const user = await window.catalyst.auth.getCurrentUser()
 
-        const userData = await response.json()
-        setUser(userData)
+      setUser(user)
 
-      } catch {
+    } catch {
 
-        navigate("login")
-
-      }
+      navigate("login")
 
     }
 
-    checkSession()
+  }
 
-  }, [])
+  checkSession()
+
+}, [])
 
   function selectContact(contact) {
 
