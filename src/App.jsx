@@ -22,8 +22,6 @@ function App() {
 
   useEffect(() => {
 
-  if (!window.catalyst) return
-
   const catalyst = window.catalyst.initialize()
   catalystRef.current = catalyst
     async function checkAuth() {
