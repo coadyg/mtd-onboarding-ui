@@ -260,7 +260,7 @@ function App() {
         element={<Onboarding />}
       />
 
-      <Route path="/login" element={<Login />} />
+      <Route path="login" element={<Login />} />
 
     </Routes>
 
