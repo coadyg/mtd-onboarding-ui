@@ -83,7 +83,7 @@ function App() {
         const response = await fetch("/server/getCurrentUser")
 
         if (response.status !== 200) {
-          navigate("/login")
+          navigate("login")
           return
         }
 
@@ -92,7 +92,7 @@ function App() {
 
       } catch {
 
-        navigate("/login")
+        navigate("login")
 
       }
 
@@ -223,7 +223,7 @@ function App() {
 
       console.log("Onboarding session created:", data)
 
-      navigate("/onboarding/" + data.sessionId)
+      navigate("onboarding/" + data.sessionId)
 
     } catch (err) {
 
@@ -256,7 +256,7 @@ function App() {
       />
 
       <Route
-        path="/onboarding/:sessionId"
+        path="onboarding/:sessionId"
         element={<Onboarding />}
       />
 
@@ -297,7 +297,7 @@ function Home(props) {
       <div style={{ marginBottom: "20px" }}>
 
         <button
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("login")}
           style={{
             padding: "8px 16px",
             borderRadius: "6px",
@@ -309,7 +309,7 @@ function Home(props) {
           Login
         </button>
 
-        <Link to="/login">Login page</Link>
+        <Link to="login">Login page</Link>
 
       </div>
 
