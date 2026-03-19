@@ -1,10 +1,12 @@
-import { Routes, Route, useNavigate } from "react-router-dom"
+import Login from "./Login"
+import { Link, Routes, Route, useNavigate } from "react-router-dom"
 import Onboarding from "./Onboarding"
 import { useState, useEffect, useRef } from "react"
 import "./App.css"
 
 function App() {
 
+  const [user, setUser] = useState(null)
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [contactIndex, setContactIndex] = useState([])
   const [results, setResults] = useState([])
@@ -71,6 +73,34 @@ function App() {
     }
 
   }
+
+  useEffect(() => {
+
+    async function checkSession() {
+
+      try {
+
+        const response = await fetch("/server/getCurrentUser")
+
+        if (response.status !== 200) {
+          navigate("/login")
+          return
+        }
+
+        const userData = await response.json()
+        setUser(userData)
+
+      } catch {
+
+        navigate("/login")
+
+      }
+
+    }
+
+    checkSession()
+
+  }, [])
 
   function selectContact(contact) {
 
@@ -221,10 +251,6 @@ function App() {
             hoverIndex={hoverIndex}
             setHoverIndex={setHoverIndex}
             selectContact={selectContact}
-            selectedContact={selectedContact}
-            clearSelection={clearSelection}
-            startOnboarding={startOnboarding}
-            sessions={sessions}
           />
         }
       />
@@ -233,6 +259,7 @@ function App() {
         path="/onboarding/:sessionId"
         element={<Onboarding />}
       />
+
       <Route path="/login" element={<Login />} />
 
     </Routes>
@@ -242,6 +269,8 @@ function App() {
 }
 
 function Home(props) {
+
+  const navigate = useNavigate()
 
   const {
     loading,
@@ -264,6 +293,25 @@ function Home(props) {
     }}>
 
       <h1>MTD Onboarding Tool</h1>
+
+      <div style={{ marginBottom: "20px" }}>
+
+        <button
+          onClick={() => navigate("/login")}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "6px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+            marginRight: "10px"
+          }}
+        >
+          Login
+        </button>
+
+        <Link to="/login">Login page</Link>
+
+      </div>
 
       {loading && (
         <div style={{
